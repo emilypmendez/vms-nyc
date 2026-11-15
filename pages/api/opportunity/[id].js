@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
     const { data, error } = await supabase
       .from('opportunities')
-      .select('*, organizations (id, name, email)')
+      .select('*, organizations (id, name)')
       .eq('id', req.query.id)
       .maybeSingle();
 
@@ -26,8 +26,8 @@ export default async function handler(req, res) {
     if (error) return sendError(res, 400, error.message);
     if (!data) return sendError(res, 404, 'Resource not found');
 
-    // Note: organizationName is null until the `organizations_public_read`
-    // policy from supabase/week3_policies.sql is added.
+    // Organization rows are private under RLS, so for anyone but the owning
+    // org the join is null and organizationName comes back null.
     return res.status(200).json({ success: true, data: formatOpportunity(data) });
   } catch (error) {
     return sendError(res, 500, error.message || 'Internal server error');

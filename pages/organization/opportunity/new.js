@@ -9,7 +9,7 @@ export default function NewOpportunityPage() {
   const router = useRouter();
 
   const handleCreate = async (payload) => {
-    await fetchApi('/api/organization/opportunities', { method: 'POST', body: payload });
+    await fetchApi('/api/organization/opportunity', { method: 'POST', body: payload });
     router.push('/organization/dashboard');
   };
 

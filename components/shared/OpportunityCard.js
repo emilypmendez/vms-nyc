@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BOROUGHS, COMMITMENTS, labelFor } from '../../lib/opportunity';
+import { BOROUGHS, COMMITMENTS, SKILLS, labelFor } from '../../lib/opportunity';
 
 export default function OpportunityCard({ opportunity }) {
   const description = opportunity.description || '';
@@ -27,7 +27,7 @@ export default function OpportunityCard({ opportunity }) {
         )}
         {(opportunity.requiredSkills || []).map((skill) => (
           <span key={skill} className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-            {skill}
+            {labelFor(SKILLS, skill)}
           </span>
         ))}
       </div>

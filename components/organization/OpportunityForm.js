@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { BOROUGHS, COMMITMENTS, STATUSES, validateOpportunity } from '../../lib/opportunity';
+import { BOROUGHS, COMMITMENTS, SKILLS, STATUSES, validateOpportunity } from '../../lib/opportunity';
 
 const EMPTY = {
   title: '',
   description: '',
-  requiredSkills: '',
+  requiredSkills: [],
   commitment: 'one-time',
   startDate: '',
   endDate: '',
@@ -14,7 +14,7 @@ const EMPTY = {
   status: 'open',
 };
 
-/** Turn an API opportunity object into form state (skills array -> comma string, nulls -> ''). */
+/** Turn an API opportunity object into form state (nulls -> ''). */
 function toFormValues(opportunity) {
   if (!opportunity) return EMPTY;
   return {
@@ -22,7 +22,7 @@ function toFormValues(opportunity) {
     ...Object.fromEntries(
       Object.keys(EMPTY).map((key) => [key, opportunity[key] ?? EMPTY[key]])
     ),
-    requiredSkills: (opportunity.requiredSkills || []).join(', '),
+    requiredSkills: opportunity.requiredSkills || [],
   };
 }
 
@@ -63,6 +63,13 @@ export default function OpportunityForm({
   const [submitting, setSubmitting] = useState(false);
 
   const set = (key) => (e) => setValues((v) => ({ ...v, [key]: e.target.value }));
+  const toggleSkill = (skill) =>
+    setValues((v) => ({
+      ...v,
+      requiredSkills: v.requiredSkills.includes(skill)
+        ? v.requiredSkills.filter((s) => s !== skill)
+        : [...v.requiredSkills, skill],
+    }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -71,7 +78,6 @@ export default function OpportunityForm({
     const payload = {
       ...values,
       slotsAvailable: Number(values.slotsAvailable),
-      requiredSkills: values.requiredSkills, // server parses the comma list
     };
     if (!showStatus) delete payload.status;
 
@@ -107,13 +113,36 @@ export default function OpportunityForm({
         />
       </Field>
 
-      <Field
-        label="Required skills"
-        error={errors.requiredSkills}
-        hint="Comma-separated, e.g. teaching, english"
-      >
-        <input className={inputClass} value={values.requiredSkills} onChange={set('requiredSkills')} />
-      </Field>
+      <fieldset>
+        <legend className="block text-sm font-medium mb-1">Required skills</legend>
+        <p className="text-xs text-gray-500">Select all that apply.</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {SKILLS.map((skill) => {
+            const selected = values.requiredSkills.includes(skill.value);
+            return (
+              <label
+                key={skill.value}
+                className={`cursor-pointer rounded-full border px-3 py-1 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 ${
+                  selected
+                    ? 'border-blue-600 bg-blue-600 text-white'
+                    : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={selected}
+                  onChange={() => toggleSkill(skill.value)}
+                />
+                {skill.label}
+              </label>
+            );
+          })}
+        </div>
+        {errors.requiredSkills && (
+          <span className="block text-sm text-red-600 mt-1">{errors.requiredSkills}</span>
+        )}
+      </fieldset>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Field label="Commitment" error={errors.commitment}>

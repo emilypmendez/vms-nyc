@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import OpportunityCard from '../../components/shared/OpportunityCard';
 import { fetchApi } from '../../lib/fetchApi';
-import { BOROUGHS } from '../../lib/opportunity';
+import { BOROUGHS, SKILLS } from '../../lib/opportunity';
 
 const PAGE_SIZE = 12;
 
@@ -36,12 +36,16 @@ function FilterForm({ initialBorough, initialSkill, onSearch, showClear }) {
       </label>
       <label className="block">
         <span className="block text-sm font-medium mb-1">Skill</span>
-        <input
+        <select
           className="px-3 py-2 border rounded bg-transparent"
-          placeholder="e.g. teaching"
           value={skill}
           onChange={(e) => setSkill(e.target.value)}
-        />
+        >
+          <option value="">All skills</option>
+          {SKILLS.map((s) => (
+            <option key={s.value} value={s.value}>{s.label}</option>
+          ))}
+        </select>
       </label>
       <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
         Search
@@ -65,7 +69,7 @@ export default function BrowseOpportunitiesPage() {
 
   const params = new URLSearchParams({ limit: PAGE_SIZE, offset: page * PAGE_SIZE });
   if (borough) params.set('borough', borough);
-  if (skill) params.set('skill', skill.trim().toLowerCase());
+  if (skill) params.set('skill', skill);
   const requestKey = params.toString();
 
   // Results are stored with the request they belong to; while the key doesn't
@@ -97,7 +101,7 @@ export default function BrowseOpportunitiesPage() {
   const navigate = ({ borough: b, skill: s, page: p }) => {
     const query = {};
     if (b) query.borough = b;
-    if (s?.trim()) query.skill = s.trim();
+    if (s) query.skill = s;
     if (p) query.page = p;
     router.push({ pathname: router.pathname, query }, undefined, { shallow: true });
   };

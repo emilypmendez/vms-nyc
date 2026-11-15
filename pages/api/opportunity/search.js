@@ -63,7 +63,7 @@ export default async function handler(req, res) {
       borough: opp.borough,
       slotsAvailable: opp.slots_available,
       status: opp.status,
-      // organizations is null when RLS hides the org row (see supabase/week3_policies.sql)
+      // organizations is null because RLS keeps organization rows private
       organizationId: opp.organizations?.id ?? null,
       organizationName: opp.organizations?.name ?? null,
       createdAt: opp.created_at,

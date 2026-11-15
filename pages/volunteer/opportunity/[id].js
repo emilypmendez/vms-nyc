@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { fetchApi } from '../../../lib/fetchApi';
-import { BOROUGHS, COMMITMENTS, labelFor } from '../../../lib/opportunity';
+import { BOROUGHS, COMMITMENTS, SKILLS, labelFor } from '../../../lib/opportunity';
 
 function formatDate(date) {
   // Dates come as YYYY-MM-DD; parse as local time so the day doesn't shift.
@@ -96,17 +96,7 @@ export default function VolunteerOpportunityPage() {
             <header>
               <h1 className="text-2xl font-bold">{opp.title}</h1>
               {opp.organizationName && (
-                <p className="text-gray-600">
-                  {opp.organizationName}
-                  {opp.organizationEmail && (
-                    <>
-                      {' · '}
-                      <a href={`mailto:${opp.organizationEmail}`} className="text-blue-600 hover:underline">
-                        {opp.organizationEmail}
-                      </a>
-                    </>
-                  )}
-                </p>
+                <p className="text-gray-600">{opp.organizationName}</p>
               )}
             </header>
 
@@ -145,7 +135,7 @@ export default function VolunteerOpportunityPage() {
                   <dd className="flex flex-wrap gap-2 mt-1">
                     {opp.requiredSkills.map((skill) => (
                       <span key={skill} className="text-xs bg-gray-100 text-gray-800 px-2 py-1 rounded">
-                        {skill}
+                        {labelFor(SKILLS, skill)}
                       </span>
                     ))}
                   </dd>
