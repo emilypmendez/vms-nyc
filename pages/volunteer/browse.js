@@ -1,11 +1,16 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import OpportunityCard from '../../components/shared/OpportunityCard';
 import { fetchApi } from '../../lib/fetchApi';
 import { BOROUGHS, SKILLS } from '../../lib/opportunity';
 
 const PAGE_SIZE = 12;
+
+// false on the server and during hydration, true after. Lets us read
+// router.isReady while rendering without a server/client HTML mismatch.
+const noopSubscribe = () => () => {};
+const useHydrated = () => useSyncExternalStore(noopSubscribe, () => true, () => false);
 
 const first = (value) => (Array.isArray(value) ? value[0] : value) || '';
 
@@ -63,6 +68,7 @@ function FilterForm({ initialBorough, initialSkill, onSearch, showClear }) {
 // Filters live in the URL (?borough=brooklyn&skill=teaching&page=1) so results can be shared.
 export default function BrowseOpportunitiesPage() {
   const router = useRouter();
+  const ready = useHydrated() && router.isReady;
   const borough = first(router.query.borough);
   const skill = first(router.query.skill);
   const page = Math.max(0, parseInt(first(router.query.page), 10) || 0);
@@ -75,7 +81,7 @@ export default function BrowseOpportunitiesPage() {
   // Results are stored with the request they belong to; while the key doesn't
   // match the current URL, we're loading.
   const [response, setResponse] = useState({ key: null, data: [], total: 0, error: '' });
-  const loading = !router.isReady || response.key !== requestKey;
+  const loading = !ready || response.key !== requestKey;
 
   useEffect(() => {
     if (!router.isReady) return;
@@ -117,7 +123,7 @@ export default function BrowseOpportunitiesPage() {
       <main className="max-w-6xl mx-auto p-6 space-y-6">
         <h1 className="text-2xl font-bold">Browse Opportunities</h1>
 
-        {router.isReady && (
+        {ready && (
           <FilterForm
             key={`${borough}|${skill}`}
             initialBorough={borough}
