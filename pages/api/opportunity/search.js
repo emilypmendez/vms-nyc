@@ -63,8 +63,9 @@ export default async function handler(req, res) {
       borough: opp.borough,
       slotsAvailable: opp.slots_available,
       status: opp.status,
-      organizationId: opp.organizations.id,
-      organizationName: opp.organizations.name,
+      // organizations is null because RLS keeps organization rows private
+      organizationId: opp.organizations?.id ?? null,
+      organizationName: opp.organizations?.name ?? null,
       createdAt: opp.created_at,
     }));
 
