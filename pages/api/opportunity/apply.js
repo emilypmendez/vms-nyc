@@ -1,27 +1,21 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
+import { authenticate } from '../../../lib/supabase';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) {
-    return res.status(401).json({ success: false, error: 'Unauthorized' });
-  }
-
   try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    if (userError || !user) {
-      return res.status(401).json({ success: false, error: 'Invalid token' });
+    // `supabase` runs as the volunteer (their JWT), so RLS sees auth.uid().
+    // The old shared anon client made every insert anonymous, and RLS
+    // rejected all applications.
+    const auth = await authenticate(req);
+    if (auth.error) {
+      return res.status(auth.statusCode).json({ success: false, error: auth.error });
     }
+    const { user, supabase } = auth;
 
-    const { opportunityId } = req.body;
+    const { opportunityId } = req.body ?? {};
 
     if (!opportunityId) {
       return res.status(422).json({
@@ -47,6 +41,13 @@ export default async function handler(req, res) {
         return res.status(409).json({
           success: false,
           error: 'You have already applied to this opportunity',
+        });
+      }
+      if (error.code === '42501') {
+        // RLS rejected the insert: the caller isn't a volunteer.
+        return res.status(403).json({
+          success: false,
+          error: 'Only volunteers can apply to opportunities',
         });
       }
       return res.status(400).json({ success: false, error: error.message });
