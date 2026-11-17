@@ -29,7 +29,7 @@ function FilterForm({ initialBorough, initialSkill, onSearch, showClear }) {
       <label className="block">
         <span className="block text-sm font-medium mb-1">Borough</span>
         <select
-          className="px-3 py-2 border border-gray-300 rounded bg-white"
+          className="px-3 py-2 border border-gray-300 rounded bg-white text-gray-900"
           value={borough}
           onChange={(e) => setBorough(e.target.value)}
         >
@@ -42,7 +42,7 @@ function FilterForm({ initialBorough, initialSkill, onSearch, showClear }) {
       <label className="block">
         <span className="block text-sm font-medium mb-1">Skill</span>
         <select
-          className="px-3 py-2 border border-gray-300 rounded bg-white"
+          className="px-3 py-2 border border-gray-300 rounded bg-white text-gray-900"
           value={skill}
           onChange={(e) => setSkill(e.target.value)}
         >

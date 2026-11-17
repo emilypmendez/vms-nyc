@@ -6,7 +6,7 @@ export default function OpportunityCard({ opportunity }) {
   const preview = description.length > 120 ? `${description.slice(0, 120)}...` : description;
 
   return (
-    <div className="border rounded bg-white p-4 hover:shadow-lg transition flex flex-col">
+    <div className="border rounded bg-white text-gray-900 p-4 hover:shadow-lg transition flex flex-col">
       <h3 className="font-bold text-lg">{opportunity.title}</h3>
       {opportunity.organizationName && (
         <p className="text-sm text-gray-600">{opportunity.organizationName}</p>

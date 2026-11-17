@@ -60,14 +60,14 @@ export default function HomePage() {
         </section>
 
         <section className="grid gap-6 sm:grid-cols-2">
-          <div className="border rounded bg-white p-5 space-y-2">
+          <div className="border rounded bg-white text-gray-900 p-5 space-y-2">
             <h2 className="font-semibold text-lg">For volunteers</h2>
             <p className="text-sm text-gray-500">
               Filter by borough and skill, apply in one click, and track your applications from
               your dashboard.
             </p>
           </div>
-          <div className="border rounded bg-white p-5 space-y-2">
+          <div className="border rounded bg-white text-gray-900 p-5 space-y-2">
             <h2 className="font-semibold text-lg">For organizations</h2>
             <p className="text-sm text-gray-500">
               Post opportunities with the skills you need, set how many volunteers you want, and
