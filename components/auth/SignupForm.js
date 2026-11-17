@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { dashboardFor, saveSession } from '../../lib/auth';
 
 const inputClass =
-  'w-full px-3 py-2 border rounded bg-transparent focus:outline-none focus:ring-2 focus:ring-blue-500';
+  'w-full px-3 py-2 border border-gray-300 rounded bg-white focus:outline-none focus:ring-2 focus:ring-blue-500';
 
 const ROLES = [
   { value: 'volunteer', label: 'Volunteer', hint: 'Find and apply to opportunities' },
@@ -111,7 +111,7 @@ export default function SignupForm() {
           {ROLES.map((r) => (
             <label
               key={r.value}
-              className={`cursor-pointer rounded border p-3 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 ${
+              className={`cursor-pointer rounded border bg-white p-3 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-blue-500 ${
                 values.role === r.value ? 'border-blue-600 ring-1 ring-blue-600' : 'border-gray-300'
               }`}
             >

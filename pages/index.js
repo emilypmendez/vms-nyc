@@ -20,7 +20,7 @@ function useSignedInRole() {
 }
 
 const buttonPrimary = 'px-5 py-2.5 bg-blue-600 text-white rounded hover:bg-blue-700';
-const buttonSecondary = 'px-5 py-2.5 border rounded hover:bg-gray-500/10';
+const buttonSecondary = 'px-5 py-2.5 border border-gray-300 bg-white text-gray-700 rounded hover:bg-gray-50';
 
 export default function HomePage() {
   const role = useSignedInRole();
@@ -60,14 +60,14 @@ export default function HomePage() {
         </section>
 
         <section className="grid gap-6 sm:grid-cols-2">
-          <div className="border rounded p-5 space-y-2">
+          <div className="border rounded bg-white p-5 space-y-2">
             <h2 className="font-semibold text-lg">For volunteers</h2>
             <p className="text-sm text-gray-500">
               Filter by borough and skill, apply in one click, and track your applications from
               your dashboard.
             </p>
           </div>
-          <div className="border rounded p-5 space-y-2">
+          <div className="border rounded bg-white p-5 space-y-2">
             <h2 className="font-semibold text-lg">For organizations</h2>
             <p className="text-sm text-gray-500">
               Post opportunities with the skills you need, set how many volunteers you want, and

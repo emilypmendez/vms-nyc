@@ -29,7 +29,7 @@ function FilterForm({ initialBorough, initialSkill, onSearch, showClear }) {
       <label className="block">
         <span className="block text-sm font-medium mb-1">Borough</span>
         <select
-          className="px-3 py-2 border rounded bg-transparent"
+          className="px-3 py-2 border border-gray-300 rounded bg-white"
           value={borough}
           onChange={(e) => setBorough(e.target.value)}
         >
@@ -42,7 +42,7 @@ function FilterForm({ initialBorough, initialSkill, onSearch, showClear }) {
       <label className="block">
         <span className="block text-sm font-medium mb-1">Skill</span>
         <select
-          className="px-3 py-2 border rounded bg-transparent"
+          className="px-3 py-2 border border-gray-300 rounded bg-white"
           value={skill}
           onChange={(e) => setSkill(e.target.value)}
         >
@@ -56,7 +56,7 @@ function FilterForm({ initialBorough, initialSkill, onSearch, showClear }) {
         Search
       </button>
       {showClear && (
-        <button type="button" className="px-4 py-2 border rounded" onClick={() => onSearch({})}>
+        <button type="button" className="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded hover:bg-gray-50" onClick={() => onSearch({})}>
           Clear
         </button>
       )}
@@ -154,7 +154,7 @@ export default function BrowseOpportunitiesPage() {
             {totalPages > 1 && (
               <div className="flex items-center gap-3">
                 <button
-                  className="px-3 py-1 border rounded disabled:opacity-40"
+                  className="px-3 py-1 border border-gray-300 bg-white text-gray-700 rounded hover:bg-gray-50 disabled:opacity-40"
                   disabled={page === 0}
                   onClick={() => navigate({ borough, skill, page: page - 1 })}
                 >
@@ -164,7 +164,7 @@ export default function BrowseOpportunitiesPage() {
                   Page {page + 1} of {totalPages}
                 </span>
                 <button
-                  className="px-3 py-1 border rounded disabled:opacity-40"
+                  className="px-3 py-1 border border-gray-300 bg-white text-gray-700 rounded hover:bg-gray-50 disabled:opacity-40"
                   disabled={page + 1 >= totalPages}
                   onClick={() => navigate({ borough, skill, page: page + 1 })}
                 >
