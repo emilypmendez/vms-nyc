@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { availabilityLabel, boroughLabel, skillLabel } from '../../lib/volunteerOptions';
 
 const STATUS_STYLES = {
   pending: 'bg-yellow-100 text-yellow-800 ring-yellow-600/20',
@@ -16,12 +17,6 @@ export function ReviewStatusBadge({ status }) {
       {status}
     </span>
   );
-}
-
-// 'event_setup' -> 'Event setup'
-export function formatSkill(value = '') {
-  const text = String(value).replace(/_/g, ' ');
-  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 export function formatDate(value) {
@@ -56,7 +51,7 @@ function SkillMatch({ volunteerSkills = [], requiredSkills = [] }) {
       <SkillChips skills={volunteerSkills} matched={matched} />
       {missing.length > 0 && (
         <p className="text-xs text-gray-500">
-          Missing: {missing.map(formatSkill).join(', ')}
+          Missing: {missing.map(skillLabel).join(', ')}
         </p>
       )}
     </div>
@@ -74,7 +69,7 @@ function SkillChips({ skills, matched }) {
             matched.includes(skill) ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700'
           }`}
         >
-          {formatSkill(skill)}
+          {skillLabel(skill)}
         </li>
       ))}
     </ul>
@@ -171,11 +166,11 @@ export default function ApplicationDetail({ application, opportunity, onClose, o
           </div>
           <div>
             <dt className="font-medium text-gray-500">Borough</dt>
-            <dd className="text-gray-900">{application.volunteerBorough ? formatSkill(application.volunteerBorough) : '—'}</dd>
+            <dd className="text-gray-900">{application.volunteerBorough ? boroughLabel(application.volunteerBorough) : '—'}</dd>
           </div>
           <div>
             <dt className="font-medium text-gray-500">Availability</dt>
-            <dd className="text-gray-900">{application.volunteerAvailability ? formatSkill(application.volunteerAvailability) : '—'}</dd>
+            <dd className="text-gray-900">{application.volunteerAvailability ? availabilityLabel(application.volunteerAvailability) : '—'}</dd>
           </div>
         </dl>
 
@@ -193,7 +188,7 @@ export default function ApplicationDetail({ application, opportunity, onClose, o
 
         <section className="mt-4">
           <label htmlFor="review-notes" className="mb-1 block text-sm font-semibold text-gray-900">
-            Notes for the volunteer <span className="font-normal text-gray-500">(optional)</span>
+            Internal notes <span className="font-normal text-gray-500">(optional)</span>
           </label>
           <textarea
             id="review-notes"
@@ -205,6 +200,7 @@ export default function ApplicationDetail({ application, opportunity, onClose, o
             className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
             placeholder="e.g. Great fit for our team!"
           />
+          <p className="mt-1 text-xs text-gray-500">Only your organization sees these notes.</p>
         </section>
 
         {slotsLeft !== null && (

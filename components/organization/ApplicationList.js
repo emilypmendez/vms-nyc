@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import ApplicationDetail, { ReviewStatusBadge, formatDate, formatSkill } from './ApplicationDetail';
+import ApplicationDetail, { ReviewStatusBadge, formatDate } from './ApplicationDetail';
+import { skillLabel } from '../../lib/volunteerOptions';
 
 // Lists every application to one of the organization's opportunities and
 // opens ApplicationDetail to accept or reject one.
@@ -109,7 +110,7 @@ export default function ApplicationList({ opportunityId }) {
                     <div className="text-gray-500">{app.volunteerEmail ?? '—'}</div>
                   </td>
                   <td className="px-4 py-2 text-gray-700">
-                    {app.volunteerSkills.length ? app.volunteerSkills.map(formatSkill).join(', ') : '—'}
+                    {app.volunteerSkills.length ? app.volunteerSkills.map(skillLabel).join(', ') : '—'}
                   </td>
                   <td className="px-4 py-2">
                     <ReviewStatusBadge status={app.status} />

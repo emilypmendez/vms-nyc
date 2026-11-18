@@ -21,7 +21,7 @@ export default function OpportunityApplyButton({
   const apply = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
-      router.push('/auth/login');
+      router.push({ pathname: '/auth/login', query: { next: router.asPath } });
       return;
     }
 
@@ -39,7 +39,7 @@ export default function OpportunityApplyButton({
       const result = await res.json();
 
       if (res.status === 401) {
-        router.push('/auth/login');
+        router.push({ pathname: '/auth/login', query: { next: router.asPath } });
         return;
       }
       if (res.status === 409 && /already applied/i.test(result.error ?? '')) {
