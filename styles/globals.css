@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
+/*
+ * One light theme for the whole site, matching the volunteer pages
+ * (gray-50 page, white cards and inputs, gray-900 text). There is no dark
+ * mode on purpose: pages shouldn't change color based on the visitor's OS
+ * setting, or the logged-out and logged-in screens look like different sites.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: var(--color-gray-50);
+  --foreground: var(--color-gray-900);
+  /* Keep native controls (date pickers, selects, scrollbars) light too. */
+  color-scheme: light;
 }
 
 @theme inline {
@@ -12,10 +20,17 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  /*
+   * Tailwind v4 draws a bare `border` in currentColor (near-black here).
+   * Default it to a light gray, like Tailwind v3 did.
+   */
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
   }
 }
 
