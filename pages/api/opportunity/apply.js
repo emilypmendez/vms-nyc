@@ -1,30 +1,46 @@
-import { authenticate } from '../../../lib/supabase';
+import { allowMethods, authenticate, isUuid, sendError } from '../../../lib/supabase';
 
+// POST /api/opportunity/apply  { opportunityId }
+// A volunteer applies to an open opportunity.
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+  if (!allowMethods(req, res, ['POST'])) return;
+
+  const opportunityId = req.body?.opportunityId;
+  if (!isUuid(opportunityId)) {
+    return sendError(res, 422, 'Validation failed', {
+      opportunityId: 'A valid opportunityId is required',
+    });
   }
 
   try {
-    // `supabase` runs as the volunteer (their JWT), so RLS sees auth.uid().
-    // The old shared anon client made every insert anonymous, and RLS
-    // rejected all applications.
     const auth = await authenticate(req);
-    if (auth.error) {
-      return res.status(auth.statusCode).json({ success: false, error: auth.error });
+    if (auth.error) return sendError(res, auth.statusCode, auth.error);
+    const { supabase, user } = auth;
+
+    // Only users with a volunteer profile can apply.
+    const { data: volunteer, error: volunteerError } = await supabase
+      .from('volunteers')
+      .select('id')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (volunteerError) return sendError(res, 400, volunteerError.message);
+    if (!volunteer) {
+      return sendError(res, 403, 'Only volunteers can apply to opportunities');
     }
-    const { user, supabase } = auth;
 
-    const { opportunityId } = req.body ?? {};
+    const { data: opportunity, error: opportunityError } = await supabase
+      .from('opportunities')
+      .select('id, status')
+      .eq('id', opportunityId)
+      .maybeSingle();
 
-    if (!opportunityId) {
-      return res.status(422).json({
-        success: false,
-        error: 'opportunityId is required',
-      });
+    if (opportunityError) return sendError(res, 400, opportunityError.message);
+    if (!opportunity) return sendError(res, 404, 'Opportunity not found');
+    if (opportunity.status !== 'open') {
+      return sendError(res, 409, 'This opportunity is no longer accepting applications');
     }
 
-    // Insert application (UNIQUE constraint prevents duplicates)
     const { data, error } = await supabase
       .from('applications')
       .insert({
@@ -32,25 +48,15 @@ export default async function handler(req, res) {
         opportunity_id: opportunityId,
         status: 'pending',
       })
-      .select()
+      .select('id, status, applied_at')
       .single();
 
     if (error) {
       if (error.code === '23505') {
-        // Unique constraint violation
-        return res.status(409).json({
-          success: false,
-          error: 'You have already applied to this opportunity',
-        });
+        // UNIQUE (volunteer_id, opportunity_id)
+        return sendError(res, 409, 'You have already applied to this opportunity');
       }
-      if (error.code === '42501') {
-        // RLS rejected the insert: the caller isn't a volunteer.
-        return res.status(403).json({
-          success: false,
-          error: 'Only volunteers can apply to opportunities',
-        });
-      }
-      return res.status(400).json({ success: false, error: error.message });
+      return sendError(res, 400, error.message);
     }
 
     return res.status(201).json({
@@ -62,6 +68,6 @@ export default async function handler(req, res) {
       },
     });
   } catch (error) {
-    return res.status(500).json({ success: false, error: error.message });
+    return sendError(res, 500, error.message);
   }
 }
