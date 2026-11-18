@@ -1,4 +1,4 @@
-import { allowMethods, authenticate, isUuid, sendError } from '../../../../lib/apiAuth';
+import { allowMethods, authenticate, isUuid, sendError } from '../../../../lib/supabase';
 
 const REVIEW_STATUSES = ['accepted', 'rejected'];
 const NOTES_MAX = 1000;
@@ -38,8 +38,8 @@ export default async function handler(req, res) {
   if (errors) return sendError(res, 422, 'Validation failed', errors);
 
   try {
-    const auth = await authenticate(req, res);
-    if (!auth) return;
+    const auth = await authenticate(req);
+    if (auth.error) return sendError(res, auth.statusCode, auth.error);
     const { supabase, user } = auth;
 
     // RLS only returns applications to this org's opportunities; the explicit

@@ -1,4 +1,4 @@
-import { allowMethods, authenticate, isUuid, sendError } from '../../../../../lib/apiAuth';
+import { allowMethods, authenticate, isUuid, sendError } from '../../../../../lib/supabase';
 
 // GET /api/organization/opportunity/:id/applications
 // The owning organization lists every application to one of its opportunities,
@@ -10,8 +10,8 @@ export default async function handler(req, res) {
   if (!isUuid(id)) return sendError(res, 404, 'Resource not found');
 
   try {
-    const auth = await authenticate(req, res);
-    if (!auth) return;
+    const auth = await authenticate(req);
+    if (auth.error) return sendError(res, auth.statusCode, auth.error);
     const { supabase, user } = auth;
 
     const { data: opportunity, error: opportunityError } = await supabase

@@ -1,4 +1,4 @@
-import { allowMethods, authenticate, isUuid, sendError } from '../../../lib/apiAuth';
+import { allowMethods, authenticate, isUuid, sendError } from '../../../lib/supabase';
 
 // POST /api/opportunity/apply  { opportunityId }
 // A volunteer applies to an open opportunity.
@@ -13,8 +13,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    const auth = await authenticate(req, res);
-    if (!auth) return;
+    const auth = await authenticate(req);
+    if (auth.error) return sendError(res, auth.statusCode, auth.error);
     const { supabase, user } = auth;
 
     // Only users with a volunteer profile can apply.
