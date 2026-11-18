@@ -2,60 +2,13 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import OpportunityApplyButton from '../../../components/volunteer/OpportunityApplyButton';
 import { fetchApi } from '../../../lib/fetchApi';
 import { BOROUGHS, COMMITMENTS, SKILLS, labelFor } from '../../../lib/opportunity';
 
 function formatDate(date) {
   // Dates come as YYYY-MM-DD; parse as local time so the day doesn't shift.
   return date ? new Date(`${date}T00:00:00`).toLocaleDateString() : null;
-}
-
-/**
- * Simple apply button.
- * Week 4 can swap this for components/volunteer/OpportunityApplyButton.js.
- */
-function ApplyButton({ opportunityId }) {
-  const router = useRouter();
-  const [state, setState] = useState({ status: 'idle', message: '' });
-
-  const apply = async () => {
-    if (!localStorage.getItem('token')) {
-      router.push('/auth/login');
-      return;
-    }
-    setState({ status: 'loading', message: '' });
-    try {
-      await fetchApi('/api/opportunity/apply', { method: 'POST', body: { opportunityId } });
-      setState({ status: 'done', message: 'Application submitted! Status: pending.' });
-    } catch (err) {
-      setState({
-        status: err.status === 409 ? 'done' : 'error',
-        message: err.message,
-      });
-    }
-  };
-
-  return (
-    <div className="space-y-2">
-      <button
-        onClick={apply}
-        disabled={state.status === 'loading' || state.status === 'done'}
-        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-400"
-      >
-        {state.status === 'loading' ? 'Applying...' : state.status === 'done' ? 'Applied' : 'Apply'}
-      </button>
-      {state.message && (
-        <p className={state.status === 'error' ? 'text-red-600 text-sm' : 'text-green-700 text-sm'}>
-          {state.message}{' '}
-          {state.status === 'done' && (
-            <Link href="/volunteer/dashboard" className="text-blue-600 hover:underline">
-              View my applications
-            </Link>
-          )}
-        </p>
-      )}
-    </div>
-  );
 }
 
 export default function VolunteerOpportunityPage() {
@@ -144,7 +97,7 @@ export default function VolunteerOpportunityPage() {
             </dl>
 
             {opp.status === 'open' ? (
-              <ApplyButton opportunityId={opp.id} />
+              <OpportunityApplyButton opportunityId={opp.id} />
             ) : (
               <p className="text-gray-600">This opportunity is no longer accepting applications.</p>
             )}

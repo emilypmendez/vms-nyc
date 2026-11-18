@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import ProtectedRoute from '../../../components/shared/ProtectedRoute';
 import OpportunityDetail from '../../../components/organization/OpportunityDetail';
+import ApplicationList from '../../../components/organization/ApplicationList';
 
 export default function EditOpportunityPage() {
   const router = useRouter();
@@ -21,12 +22,7 @@ export default function EditOpportunityPage() {
 
         {id && <OpportunityDetail id={id} />}
 
-        {/*
-          Week 4 (application flow): render the applications for this
-          opportunity here, e.g.
-            <ApplicationList opportunityId={id} />
-          from components/organization/ApplicationList.js
-        */}
+        {id && <ApplicationList opportunityId={id} />}
       </main>
     </ProtectedRoute>
   );
