@@ -1,5 +1,9 @@
 import { authenticateAdmin } from '../../../lib/authenticateAdmin';
 import { allowMethods, sendError } from '../../../lib/supabase';
+import { STATUSES } from '../../../lib/opportunity';
+import { BOROUGH_VALUES } from '../../../lib/volunteerOptions';
+
+const STATUS_VALUES = STATUSES.map((s) => s.value);
 
 export default async function handler(req, res) {
   if (!allowMethods(req, res, ['GET'])) return;
@@ -21,6 +25,8 @@ export default async function handler(req, res) {
     if (
       typeof borough !== 'string' ||
       typeof status !== 'string' ||
+      (borough && !BOROUGH_VALUES.includes(borough)) ||
+      (status && !STATUS_VALUES.includes(status)) ||
       !Number.isInteger(limit) ||
       limit < 1 || limit > 100 ||
       !Number.isInteger(offset) || offset < 0

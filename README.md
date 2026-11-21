@@ -18,7 +18,7 @@ Built with **Next.js 16 (Pages Router)**, **React 19**, **Tailwind CSS 4** and *
 
 ## How the app works
 
-There are three kinds of users. Everyone sees the same light theme, whatever their computer's light/dark setting.
+There are four kinds of users. Everyone sees the same light theme, whatever their computer's light/dark setting.
 
 ### Visitors (not logged in)
 
@@ -44,7 +44,14 @@ There are three kinds of users. Everyone sees the same light theme, whatever the
 
 ### Admins
 
-There's no admin area yet; see [Not built yet](#not-built-yet).
+Admin accounts can't be created through sign-up; see [Making an admin](#5-making-an-admin).
+
+1. **Log in**: admins land on the admin dashboard.
+2. **Dashboard (`/admin/dashboard`)**: totals for users, organizations, opportunities and pending applications; bar charts of opportunities by borough and applications by status; links to the four management pages.
+3. **Users (`/admin/users`)**: every account with name, email, role and join date, filterable by role.
+4. **Organizations (`/admin/organizations`)**: every organization with its opportunity count and verification status. **Verify** or **Unverify** (after a confirmation) changes the badge the organization sees on its dashboard.
+5. **Opportunities (`/admin/opportunities`)**: every opportunity on the platform (any status), filterable by borough and status, with application counts.
+6. **Applications (`/admin/applications`)**: every application, with volunteer, opportunity, organization, borough, status and date, filterable by status and borough.
 
 ### Privacy rules (enforced in the database)
 
@@ -68,6 +75,11 @@ There's no admin area yet; see [Not built yet](#not-built-yet).
 | `/organization/dashboard` | Organizations | Organization header and opportunities table |
 | `/organization/opportunity/new` | Organizations | Create an opportunity |
 | `/organization/opportunity/[id]` | Organizations | Edit an opportunity; review and accept/reject applicants |
+| `/admin/dashboard` | Admins | Platform totals, charts and links to the management pages |
+| `/admin/users` | Admins | All accounts, filterable by role |
+| `/admin/organizations` | Admins | All organizations; verify or unverify them |
+| `/admin/opportunities` | Admins | All opportunities, filterable by borough and status |
+| `/admin/applications` | Admins | All applications, filterable by status and borough |
 
 Logged-in pages use `components/shared/ProtectedRoute.js`. It sends logged-out users to `/auth/login?next=<page>`, and users with the wrong role to their own dashboard.
 
@@ -113,6 +125,20 @@ Errors look like `{ "success": false, "error": "…", "statusCode": 422, "detail
 | `GET` | `/api/organization/opportunity/:id/applications` | organization | Applicants with volunteer details, plus the opportunity's required skills and slot counts |
 | `PUT` | `/api/organization/application/:id` | organization | `{ status: "accepted" \| "rejected", notes? }`. 409 if the application was withdrawn or every slot is filled. |
 
+### Admin
+
+Every admin route checks the token, then confirms `profiles.role = 'admin'` on the server (`lib/authenticateAdmin.js`); anyone else gets **403**. Only after that check do these routes use the service-role client, which reads across all accounts. List routes take `limit` (1–100, default 20) and `offset`, return `{ data, total, limit, offset }`, and reject unknown filter values with **422**.
+
+| Method | Route | Auth | Description |
+|---|---|---|---|
+| `GET` | `/api/admin/dashboard` | admin | `{ totalUsers, totalOrganizations, totalOpportunities, pendingApplications }` |
+| `GET` | `/api/admin/charts` | admin | `{ opportunitiesByBorough, applicationsByStatus }`, each a list of `{ label, count }` |
+| `GET` | `/api/admin/users` | admin | Accounts with name, email, role and join date. Filter: `role` |
+| `GET` | `/api/admin/organizations` | admin | Organizations with verification status and opportunity count |
+| `GET` | `/api/admin/opportunities` | admin | All opportunities with organization and application count. Filters: `borough`, `status` |
+| `GET` | `/api/admin/applications` | admin | All applications with volunteer, opportunity and organization. Filters: `status`, `borough` |
+| `PUT` | `/api/admin/organization/:id/verify` | admin | `{ verified: true \| false }` |
+
 ---
 
 ## Getting started
@@ -154,7 +180,7 @@ Open http://localhost:3000.
 |---|---|
 | `npm run dev` | Development server with hot reload |
 | `npm run lint` | ESLint |
-| `npm run build` | Production build (fails until the admin pages exist; see [Not built yet](#not-built-yet)) |
+| `npm run build` | Production build |
 | `npm run start` | Serve a production build |
 
 ### 4. Database policies
@@ -165,6 +191,17 @@ Run these once, in order, in the **Supabase SQL Editor**, after the base tables 
 2. `supabase/migrations/20261115_application_flow_rls.sql` lets organizations read the profiles of volunteers who applied to their opportunities.
 
 > Organization rows are meant to be private. If logged-out users can read the `organizations` table, look for a public `SELECT` policy (`select policyname, cmd, roles, qual from pg_policies where tablename = 'organizations';`) and drop it.
+
+### 5. Making an admin
+
+Sign-up only offers Volunteer or Organization, so nobody can make themselves an admin. To create one, sign up normally, then run this in the Supabase SQL Editor with that account's email:
+
+```sql
+update profiles set role = 'admin'
+where id = (select id from auth.users where email = 'someone@example.com');
+```
+
+They'll land on `/admin/dashboard` the next time they log in.
 
 ---
 
@@ -192,18 +229,20 @@ pages/                 Routes (Pages Router)
   auth/                Log in and sign up
   volunteer/           Browse, opportunity detail, dashboard, profile
   organization/        Dashboard, create and edit opportunities
-  admin/               Placeholders (not built yet)
+  admin/               Admin dashboard and management pages
 components/
   auth/                LoginForm, SignupForm
   organization/        OpportunityForm, OpportunityList, OpportunityDetail,
                        ApplicationList, ApplicationDetail (review panel)
   volunteer/           ProfileForm, VolunteerDashboard, ApplicationList,
                        OpportunityApplyButton
+  admin/               DashboardCharts
   shared/              ProtectedRoute, OpportunityCard
 lib/
   supabase.js          Server helpers: getSupabase(token), authenticate(req),
                        authenticateOrganization(req), sendError, isUuid, allowMethods
-  supabaseAdmin.js     Service-role client (server only; used by signup)
+  supabaseAdmin.js     Service-role client (server only; signup and admin routes)
+  authenticateAdmin.js authenticateAdmin(req): token check + profiles.role = 'admin'
   auth.js              Browser session helpers: saveSession, clearSession,
                        dashboardFor(role), safeNextPath
   fetchApi.js          Browser helper for calling /api with the saved token
@@ -218,7 +257,7 @@ styles/globals.css     Tailwind and the site-wide light theme
 ## Conventions
 
 - **Next.js 16 differs from older versions.** Check the bundled docs in `node_modules/next/dist/docs/` before relying on older Next.js knowledge (see `AGENTS.md`).
-- **Query Supabase as the user.** In API routes, use `authenticate(req)` or `authenticateOrganization(req)` from `lib/supabase.js`. A plain anon client without the user's token runs as an anonymous user, and RLS rejects the query.
+- **Query Supabase as the user.** In API routes, use `authenticate(req)` or `authenticateOrganization(req)` from `lib/supabase.js`. A plain anon client without the user's token runs as an anonymous user, and RLS rejects the query. Admin routes use `authenticateAdmin(req)` from `lib/authenticateAdmin.js`, and only use its service-role client after that check passes.
 - **Use the shared value lists.** Skills, boroughs and availability come from `lib/volunteerOptions.js`, so volunteer profiles and opportunities store the same values and skill search works. Show values with `skillLabel`, `boroughLabel` and `availabilityLabel`, not by reformatting strings.
 - **One light theme.** The page is `gray-50` with `gray-900` text, white cards and inputs, and `border-gray-300` controls. Don't add `dark:` styles or a `prefers-color-scheme` override. White surfaces set their own text color (`text-gray-900`).
 - **Router readiness.** Read `router.isReady` inside `useEffect`, not while rendering, or the server and client HTML won't match.
@@ -227,7 +266,6 @@ styles/globals.css     Tailwind and the site-wide light theme
 
 ## Not built yet
 
-- **Admin area**: `pages/admin/*` and `components/admin/*` are empty files, so `npm run build` fails on them.
 - **Log out**: there's no log-out button, and `pages/api/auth/logout.js` is empty. `clearSession()` in `lib/auth.js` exists for when one is added.
 - **Withdrawing an application**: the database and review screen understand a `withdrawn` status, but volunteers can't withdraw yet.
 - **Review notes for volunteers**: notes are internal; `/api/volunteer/applications` doesn't return them.

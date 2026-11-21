@@ -1,3 +1,5 @@
+import Head from 'next/head';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import ProtectedRoute from '../../components/shared/ProtectedRoute';
 import { fetchApi } from '../../lib/fetchApi';
@@ -11,6 +13,9 @@ function OrganizationsContent() {
 
   const limit = 20;
   const [updatingId, setUpdatingId] = useState(null);
+  // A failed Verify/Unverify click. Kept separate from `error` (failed to
+  // load the list) so the table stays on screen when one action fails.
+  const [actionError, setActionError] = useState('');
 
   async function updateVerification(org) {
     const newStatus = !org.verified;
@@ -22,7 +27,7 @@ function OrganizationsContent() {
     if (!confirmed) return;
 
     setUpdatingId(org.id);
-    setError('');
+    setActionError('');
 
     try {
       const result = await fetchApi(
@@ -41,7 +46,9 @@ function OrganizationsContent() {
         )
       );
     } catch (err) {
-      setError(err.message || 'Failed to update verification');
+      setActionError(
+        `Couldn't ${newStatus ? 'verify' : 'unverify'} ${org.name}: ${err.message || 'unknown error'}`
+      );
     } finally {
       setUpdatingId(null);
     }
@@ -83,6 +90,14 @@ function OrganizationsContent() {
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
+      <Head>
+        <title>Organizations · Admin</title>
+      </Head>
+
+      <Link href="/admin/dashboard" className="mb-3 inline-block text-blue-600 text-sm hover:underline">
+        &larr; Back to admin dashboard
+      </Link>
+
       <h1 className="text-3xl font-bold mb-2">
         Organization Management
       </h1>
@@ -94,6 +109,12 @@ function OrganizationsContent() {
       {error && (
         <p className="text-red-600 mb-4">
           Error: {error}
+        </p>
+      )}
+
+      {actionError && (
+        <p role="alert" className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">
+          {actionError}
         </p>
       )}
 
