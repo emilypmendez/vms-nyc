@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import DashboardCharts from '../../components/admin/DashboardCharts';
 import { useEffect, useState } from 'react';
 import ProtectedRoute from '../../components/shared/ProtectedRoute';
@@ -35,6 +36,10 @@ function AdminDashboardContent() {
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
+      <Head>
+        <title>Admin Dashboard</title>
+      </Head>
+
       <h1 className="text-3xl font-bold text-gray-900 mb-2">
         VMS Admin Dashboard
       </h1>

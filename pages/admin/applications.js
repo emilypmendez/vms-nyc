@@ -1,4 +1,6 @@
 
+import Head from 'next/head';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import ProtectedRoute from '../../components/shared/ProtectedRoute';
 import { fetchApi } from '../../lib/fetchApi';
@@ -65,6 +67,14 @@ function ApplicationsContent() {
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
+      <Head>
+        <title>Applications · Admin</title>
+      </Head>
+
+      <Link href="/admin/dashboard" className="mb-3 inline-block text-blue-600 text-sm hover:underline">
+        &larr; Back to admin dashboard
+      </Link>
+
       <h1 className="text-3xl font-bold mb-2">
         Application Tracking
       </h1>
