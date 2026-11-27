@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import LoginForm from '../../components/auth/LoginForm';
@@ -15,7 +16,17 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold">Log in</h1>
         {/* key re-mounts the form once the query (e.g. ?email=) is available */}
         <LoginForm key={email} initialEmail={email} />
+
+        <p className="text-center text-sm">
+          <Link
+            href="/auth/forgot-password"
+            className="text-blue-600 hover:underline"
+          >
+            Forgot your password?
+          </Link>
+        </p>
       </main>
     </>
   );
 }
+
