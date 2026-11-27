@@ -283,3 +283,21 @@ styles/globals.css     Tailwind and the site-wide light theme
 | `/api/auth/me` returns `profile: null`, or role-protected pages bounce you | Run `supabase/week3_policies.sql`. The role falls back to `user_metadata.role` if the profile can't be read. |
 | Signup fails with "Server is missing SUPABASE_SERVICE_ROLE_KEY" | Add `SUPABASE_SERVICE_ROLE_KEY` to `.env.local` and restart the dev server. |
 | "new row violates row-level security policy" | The route is querying without the user's token. Use `authenticate(req)` from `lib/supabase.js`. |
+
+## Database Schema
+
+The VMS-NYC application uses Supabase PostgreSQL.
+
+A snapshot of the live public database schema is available here:
+
+[supabase/schema.sql](supabase/schema.sql)
+
+The schema includes:
+- Database table definitions and relationships
+- Row Level Security (RLS) policies
+- Database functions
+- Permissions and grants
+
+The schema was exported from the Supabase project on November 27, 2026.
+
+**Note:** This is a schema-only snapshot for documentation and review. It does not include user records or application data and has not been validated as a complete database restoration script.
